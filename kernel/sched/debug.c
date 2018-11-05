@@ -1006,7 +1006,7 @@ void proc_sched_show_task(struct task_struct *p, struct pid_namespace *ns,
 	P(policy);
 	P(prio);
 	P(latency_prio);
-	if (p->policy == SCHED_DEADLINE) {
+	if (task_has_dl_policy(p)) {
 		P(dl.runtime);
 		P(dl.deadline);
 	}

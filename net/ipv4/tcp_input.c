@@ -7094,6 +7094,8 @@ int tcp_conn_request(struct request_sock_ops *rsk_ops,
 			 * by the failed call to inet_csk_reqsk_queue_add
 			 */
 			bh_unlock_sock(meta_sk);
+			if (meta_sk != fastopen_sk)
+				sock_put(meta_sk);
 #else
 			bh_unlock_sock(fastopen_sk);
 #endif
@@ -7104,8 +7106,10 @@ int tcp_conn_request(struct request_sock_ops *rsk_ops,
 		sk->sk_data_ready(sk);
 		bh_unlock_sock(fastopen_sk);
 #ifdef CONFIG_MPTCP
-		if (meta_sk != fastopen_sk)
+		if (meta_sk != fastopen_sk) {
 			bh_unlock_sock(meta_sk);
+			sock_put(meta_sk);
+		}
 #endif
 		sock_put(fastopen_sk);
 	} else {

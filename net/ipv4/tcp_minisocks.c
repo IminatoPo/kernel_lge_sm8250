@@ -936,6 +936,9 @@ struct sock *tcp_check_req(struct sock *sk, struct sk_buff *skb,
 	}
 #endif
 
+	/* Fallback to regular TCP */
+	tcp_sk(child)->mpc = 0;
+
 	if (meta_locked)
 		bh_unlock_sock(sk);
 

@@ -724,14 +724,6 @@ static int enter_state(suspend_state_t state)
 	mutex_unlock(&system_transition_mutex);
 	return error;
 }
-#ifdef CONFIG_LGE_PM
-static bool debug_irq_pin = false;
-bool suspend_debug_irq_pin(void)
-{
-	return debug_irq_pin;
-}
-EXPORT_SYMBOL(suspend_debug_irq_pin);
-#endif
 
 /**
  * pm_suspend - Externally visible function for suspending the system.
@@ -746,9 +738,7 @@ int pm_suspend(suspend_state_t state)
 
 	if (state <= PM_SUSPEND_ON || state >= PM_SUSPEND_MAX)
 		return -EINVAL;
-#ifdef CONFIG_LGE_PM
-	debug_irq_pin = true;
-#endif
+
 	pr_info("suspend entry (%s)\n", mem_sleep_labels[state]);
 	error = enter_state(state);
 	if (error) {
@@ -758,9 +748,7 @@ int pm_suspend(suspend_state_t state)
 		suspend_stats.success++;
 	}
 	pr_info("suspend exit\n");
-#ifdef CONFIG_LGE_PM
-	debug_irq_pin = false;
-#endif
+
 	return error;
 }
 EXPORT_SYMBOL(pm_suspend);

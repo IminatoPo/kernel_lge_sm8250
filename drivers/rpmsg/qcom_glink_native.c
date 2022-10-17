@@ -28,10 +28,6 @@
 #include "rpmsg_internal.h"
 #include "qcom_glink_native.h"
 
-#ifdef CONFIG_LGE_PM
-#include <linux/suspend.h>
-#endif
-
 #define GLINK_LOG_PAGE_CNT 2
 #define GLINK_INFO(ctxt, x, ...)					  \
 do {									  \
@@ -155,9 +151,6 @@ struct qcom_glink {
 
 	struct work_struct rx_work;
 
-#ifdef CONFIG_LGE_PM
-	struct work_struct irq_work;
-#endif
 	spinlock_t rx_lock;
 	struct list_head rx_queue;
 
@@ -1260,12 +1253,6 @@ static irqreturn_t qcom_glink_native_intr(int irq, void *data)
 		pm_system_wakeup();
 	}
 
-#ifdef CONFIG_LGE_PM
-	if (suspend_debug_irq_pin()) {
-		schedule_work(&glink->irq_work);
-	}
-#endif
-
 	/* To wakeup any blocking writers */
 	wake_up_all(&glink->tx_avail_notify);
 
@@ -1980,14 +1967,6 @@ static void qcom_glink_work(struct work_struct *work)
 	}
 }
 
-#ifdef CONFIG_LGE_PM
-static void irq_err_work(struct work_struct *work)
-{
-	struct qcom_glink *glink = container_of(work, struct qcom_glink, irq_work);
-	pr_err("%s : irq = %d, name = %s\n",__func__, glink->irq, dev_name(glink->dev));
-}
-#endif
-
 static ssize_t rpmsg_name_show(struct device *dev,
 			       struct device_attribute *attr, char *buf)
 {
@@ -2118,9 +2097,6 @@ struct qcom_glink *qcom_glink_native_probe(struct device *dev,
 	INIT_LIST_HEAD(&glink->rx_queue);
 	INIT_WORK(&glink->rx_work, qcom_glink_work);
 	init_waitqueue_head(&glink->tx_avail_notify);
-#ifdef CONFIG_LGE_PM
-	INIT_WORK(&glink->irq_work, irq_err_work);
-#endif
 
 	spin_lock_init(&glink->idr_lock);
 	idr_init(&glink->lcids);
@@ -2221,9 +2197,6 @@ void qcom_glink_native_remove(struct qcom_glink *glink)
 
 	qcom_glink_cancel_rx_work(glink);
 	cancel_work_sync(&glink->rx_work);
-#ifdef CONFIG_LGE_PM
-	cancel_work_sync(&glink->irq_work);
-#endif
 
 	ret = device_for_each_child(glink->dev, NULL, qcom_glink_remove_device);
 	if (ret)

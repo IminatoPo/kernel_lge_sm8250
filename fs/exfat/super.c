@@ -1102,7 +1102,11 @@ static struct dentry *exfat_fs_mount(struct file_system_type *fs_type,
 
 static struct file_system_type exfat_fs_type = {
 	.owner			= THIS_MODULE,
+#ifdef CONFIG_EXFAT_COMPAT_TUXERA
+	.name			= "texfat",
+#else
 	.name			= "exfat",
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 	.init_fs_context	= exfat_init_fs_context,
 	.parameters		= exfat_parameters,
@@ -1170,7 +1174,11 @@ static void __exit exit_exfat_fs(void)
 module_init(init_exfat_fs);
 module_exit(exit_exfat_fs);
 
+#ifdef CONFIG_EXFAT_COMPAT_TUXERA
+MODULE_ALIAS_FS("texfat");
+#else
 MODULE_ALIAS_FS("exfat");
+#endif
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("exFAT filesystem support");
 MODULE_AUTHOR("Samsung Electronics Co., Ltd.");

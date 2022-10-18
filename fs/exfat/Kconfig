@@ -19,3 +19,15 @@ config EXFAT_DEFAULT_IOCHARSET
 	  converting between the encoding is used for user visible filename and
 	  UTF-16 character that exfat filesystem use, and can be overridden with
 	  the "iocharset" mount option for exFAT filesystems.
+
+config EXFAT_COMPAT_TUXERA
+	bool "Tuxera compatibility for EXFAT"
+	default n
+	depends on EXFAT_FS
+	help
+	  Say Y here for the exFAT driver to register as texfat and
+	  to support extra mount options for drop-in replacement on
+	  systems previously using Tuxera's commercial exFAT driver.
+
+	  If you are building exFAT as a module, this will change
+	  the module's name to texfat.

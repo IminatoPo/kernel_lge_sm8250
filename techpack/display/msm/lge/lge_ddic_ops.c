@@ -6,7 +6,6 @@
 #include "cm/lge_color_manager.h"
 
 extern struct lge_ddic_ops sw43103_ops;
-extern struct lge_ddic_ops sw43410_ops;
 
 struct lge_ddic_match {
 	char compatible[15];
@@ -15,7 +14,6 @@ struct lge_ddic_match {
 
 static struct lge_ddic_match supported_ddic_list[] = {
 	{"sw43103", &sw43103_ops},
-	{"sw43410", &sw43410_ops},
 };
 
 extern char* get_ddic_name(void);

@@ -4,7 +4,6 @@ ccflags-y += -I$(srctree)/techpack/display/msm/sde
 lge_display_common-objs := lge_dsi_panel.o
 lge_display_common-objs += lge_panel_reg.o
 lge_display_common-objs += lge_ddic_ops.o
-lge_display_common-objs += lge_ddic_ops_sw43410.o
 lge_display_common-objs += lge_ddic_ops_sw43103.o
 lge_display_common-objs += ambient/lge_backlight_ex.o
 lge_display_common-objs += ambient/lge_ambient.o

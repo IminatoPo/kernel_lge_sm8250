@@ -6,6 +6,11 @@ config QCA_CLD_WLAN
 	help
 	  Add support for the Qualcomm Atheros CLD WLAN module
 
+config QCA_FEATURE_SUPPORT_LGE
+	tristate "Add a feature support for LGE"
+	default n
+	help
+	  Add support for the LGE FEATURE
 if QCA_CLD_WLAN != n
 
 config QCA_CLD_WLAN_PROFILE

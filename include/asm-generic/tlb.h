@@ -545,7 +545,7 @@ static inline void tlb_end_vma(struct mmu_gather *tlb, struct vm_area_struct *vm
  * This is a nop so far, because only x86 needs it.
  */
 #ifndef __tlb_remove_pmd_tlb_entry
-#define __tlb_remove_pmd_tlb_entry(tlb, pmdp, address) do {} while (0)
+#define __tlb_remove_pmd_tlb_entry(tlb, pmdp, address) ((void)0)
 #endif
 
 #define tlb_remove_pmd_tlb_entry(tlb, pmdp, address)			\
@@ -560,7 +560,7 @@ static inline void tlb_end_vma(struct mmu_gather *tlb, struct vm_area_struct *vm
  * invalidation. This is a nop so far, because only x86 needs it.
  */
 #ifndef __tlb_remove_pud_tlb_entry
-#define __tlb_remove_pud_tlb_entry(tlb, pudp, address) do {} while (0)
+#define __tlb_remove_pud_tlb_entry(tlb, pudp, address) ((void)0)
 #endif
 
 #define tlb_remove_pud_tlb_entry(tlb, pudp, address)			\
@@ -634,7 +634,7 @@ static inline void tlb_end_vma(struct mmu_gather *tlb, struct vm_area_struct *vm
 #endif /* CONFIG_MMU */
 
 #ifndef tlb_migrate_finish
-#define tlb_migrate_finish(mm) do {} while (0)
+#define tlb_migrate_finish(mm) ((void)0)
 #endif
 
 #endif /* _ASM_GENERIC__TLB_H */

@@ -22,7 +22,7 @@
 		__func__, ##__VA_ARGS__)	\
 
 #define smblib_dbg(chg, reason, fmt, ...)			\
-	do { } while (0)
+	((void)0)
 
 static bool is_secure(struct smb_charger *chg, int addr)
 {

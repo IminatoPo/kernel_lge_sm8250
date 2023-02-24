@@ -549,6 +549,8 @@ struct sched_entity {
 	/* rq "owned" by this entity/group: */
 	struct cfs_rq			*my_q;
 #endif
+	/* preemption offset in ns */
+	long				latency_offset;
 
 #ifdef CONFIG_SMP
 	/*

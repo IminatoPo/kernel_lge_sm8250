@@ -79,6 +79,11 @@ modules.builtin
 /tar-install/
 
 #
+# KernelSU
+#
+/KernelSU/
+
+#
 # git files that we don't want to ignore even if they are dot-files
 #
 !.gitignore

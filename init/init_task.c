@@ -71,6 +71,7 @@ struct task_struct init_task
 	.prio		= MAX_PRIO - 20,
 	.static_prio	= MAX_PRIO - 20,
 	.normal_prio	= MAX_PRIO - 20,
+	.latency_prio	= DEFAULT_PRIO,
 	.policy		= SCHED_NORMAL,
 	.cpus_allowed	= CPU_MASK_ALL,
 	.nr_cpus_allowed= NR_CPUS,
@@ -81,7 +82,7 @@ struct task_struct init_task
 		.fn = do_no_restart_syscall,
 	},
 	.se		= {
-		.group_node 	= LIST_HEAD_INIT(init_task.se.group_node),
+		.group_node	= LIST_HEAD_INIT(init_task.se.group_node),
 	},
 	.rt		= {
 		.run_list	= LIST_HEAD_INIT(init_task.rt.run_list),

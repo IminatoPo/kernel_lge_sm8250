@@ -2136,7 +2136,7 @@ extern const_debug unsigned int sysctl_sched_migration_cost;
 
 extern unsigned int sysctl_sched_base_slice;
 
-extern long calc_latency_offset(int prio);
+extern void set_latency_fair(struct sched_entity *se, int prio);
 
 #ifdef CONFIG_SCHED_HRTICK
 

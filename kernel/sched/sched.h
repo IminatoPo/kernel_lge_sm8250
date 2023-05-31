@@ -576,6 +576,9 @@ struct cfs_rq {
 	/* h_nr_running for SCHED_IDLE tasks */
 	unsigned int		idle_h_nr_running;
 
+	s64			avg_vruntime;
+	u64			avg_load;
+
 	u64			exec_clock;
 	u64			min_vruntime;
 #ifndef CONFIG_64BIT
@@ -3087,6 +3090,8 @@ static inline void restore_cgroup_boost_settings(void) { }
 #endif
 
 extern int alloc_related_thread_groups(void);
+
+extern u64 avg_vruntime(struct cfs_rq *cfs_rq);
 
 extern void check_for_migration(struct rq *rq, struct task_struct *p);
 

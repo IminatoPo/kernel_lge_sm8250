@@ -242,11 +242,6 @@ static int proc_dointvec_minmax_sysadmin(struct ctl_table *table, int write,
 				void __user *buffer, size_t *lenp, loff_t *ppos);
 #endif
 
-#ifdef CONFIG_SCHED_DEBUG
-static int idle_min_granularity = 750000ULL;
-static int idle_max_granularity = 7500000ULL;
-#endif /* CONFIG_SCHED_DEBUG */
-
 static int proc_dointvec_minmax_coredump(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos);
 #ifdef CONFIG_COREDUMP
@@ -655,38 +650,11 @@ static struct ctl_table kern_table[] = {
 		.extra2		= &max_sched_granularity_ns,
 	},
 	{
-		.procname	= "sched_idle_min_granularity_ns",
-		.data		= &sysctl_sched_min_granularity,
-		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
-		.proc_handler	= sched_proc_update_handler,
-		.extra1		= &idle_min_granularity_ns,
-		.extra2		= &idle_max_granularity_ns,
-	},
-	{
-		.procname	= "sched_latency_ns",
-		.data		= &sysctl_sched_latency,
-		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
-		.proc_handler	= sched_proc_update_handler,
-		.extra1		= &min_sched_granularity_ns,
-		.extra2		= &max_sched_granularity_ns,
-	},
-	{
 		.procname	= "sched_sync_hint_enable",
 		.data		= &sysctl_sched_sync_hint_enable,
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
-	},
-	{
-		.procname	= "sched_wakeup_granularity_ns",
-		.data		= &sysctl_sched_wakeup_granularity,
-		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
-		.proc_handler	= sched_proc_update_handler,
-		.extra1		= &min_wakeup_granularity_ns,
-		.extra2		= &max_wakeup_granularity_ns,
 	},
 #ifdef CONFIG_SMP
 	{

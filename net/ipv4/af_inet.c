@@ -105,7 +105,7 @@
 #include <net/ip_fib.h>
 #include <net/inet_connection_sock.h>
 #include <net/tcp.h>
-#ifdef CONFIG_LGP_DATA_TCPIP_MPTCP
+#ifdef CONFIG_MPTCP
 #include <net/mptcp.h>
 #endif
 #include <net/udp.h>
@@ -170,7 +170,7 @@ void inet_sock_destruct(struct sock *sk)
 		return;
 	}
 
-#ifdef CONFIG_LGP_DATA_TCPIP_MPTCP
+#ifdef CONFIG_MPTCP
 	if (sock_flag(sk, SOCK_MPTCP))
 		mptcp_disable_static_key();
 #endif
@@ -269,7 +269,7 @@ EXPORT_SYMBOL(inet_listen);
  *	Create an inet socket.
  */
 
-#ifdef CONFIG_LGP_DATA_TCPIP_MPTCP
+#ifdef CONFIG_MPTCP
 int inet_create(struct net *net, struct socket *sock, int protocol, int kern)
 #else
 static int inet_create(struct net *net, struct socket *sock, int protocol,
@@ -774,7 +774,7 @@ int inet_accept(struct socket *sock, struct socket *newsock, int flags,
 
 	sock_rps_record_flow(sk2);
 
-#ifdef CONFIG_LGP_DATA_TCPIP_MPTCP
+#ifdef CONFIG_MPTCP
 	if (sk2->sk_protocol == IPPROTO_TCP && mptcp(tcp_sk(sk2))) {
 		struct mptcp_tcp_sock *mptcp;
 
@@ -2006,7 +2006,7 @@ static int __init inet_init(void)
 	if (init_ipv4_mibs())
 		panic("%s: Cannot init ipv4 mibs\n", __func__);
 
-#ifdef CONFIG_LGP_DATA_TCPIP_MPTCP
+#ifdef CONFIG_MPTCP
 	/* We must initialize MPTCP before TCP. */
 	mptcp_init();
 #endif

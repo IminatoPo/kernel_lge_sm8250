@@ -520,7 +520,7 @@ unsigned char DownloadToEP1_Ver2(const uint8_t* DataPM, uint32_t LengthPM,
 #if 0
 	UlCnt=0;
 	do{
-		if(UlCnt++ > 10) break;						// 400kHz‚Å2‰ñ–ÚB
+		if(UlCnt++ > 10) break;						// 400kHz
 		RamRead32A(PmCheck_EndFlag, &UlReadVal);
 	}while (UlReadVal == 0);
 	RamRead32A(PmCheck_CheckSum, &ReadVerifyPM);
@@ -1141,7 +1141,7 @@ int32_t RamWrite32A(uint32_t RamAddr, uint32_t RamData)
 
 	ret = camera_io_dev_write(
 		&(local_cam_ois_t->io_master_info),
-		&i2c_reg_setting);
+		&i2c_reg_setting, false);
 	kfree(i2c_reg_setting.reg_setting);
 	return ret;
 }
@@ -1175,7 +1175,7 @@ int32_t CntWrt(uint8_t *data, uint16_t num_byte)
 	}
 
 	ret = camera_io_dev_write_continuous(&(local_cam_ois_t->io_master_info),
-		&i2c_reg_setting, 1);
+		&i2c_reg_setting, 1, false);
 
 	if (ret < 0) {
 		CAM_ERR(CAM_OIS, "CntWrt fail %d", ret);

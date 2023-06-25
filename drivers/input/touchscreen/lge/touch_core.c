@@ -130,6 +130,7 @@ static void touch_report_event(struct touch_core_data *ts)
 			input_report_abs(ts->input, ABS_MT_ORIENTATION,
 					ts->tdata[i].orientation);
 
+			#if 0
 			if (press_mask & (1 << i)) {
 				if (hide_lockscreen_coord) {
 					TOUCH_I("%d finger pressed:<%d>(xxxx,xxxx,xxxx)\n",
@@ -143,9 +144,11 @@ static void touch_report_event(struct touch_core_data *ts)
 							ts->tdata[i].pressure);
 				}
 			}
+			#endif
 		} else if (release_mask & (1 << i)) {
 			input_mt_slot(ts->input, i);
 			input_mt_report_slot_state(ts->input, MT_TOOL_FINGER, false);
+			#if 0
 			if (hide_lockscreen_coord) {
 				TOUCH_I(" finger released:<%d>(xxxx,xxxx,xxxx)\n",
 						i);
@@ -156,6 +159,7 @@ static void touch_report_event(struct touch_core_data *ts)
 						ts->tdata[i].y,
 						ts->tdata[i].pressure);
 			}
+			#endif
 		}
 	}
 

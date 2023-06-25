@@ -139,6 +139,7 @@ void dex_input_handler(struct device *dev, struct input_dev *input)
 				} else {
 					ts->tdata[i].dex_data.status = DEX_PRESSED;
 					ts->dex_tcount++;
+					#if 0
 					if (hide_lockscreen_coord) {
 						TOUCH_I("%d finger pressed dex:<%d>(xxxx,xxxx,xxxx)\n",
 								ts->tcount, i);
@@ -149,6 +150,7 @@ void dex_input_handler(struct device *dev, struct input_dev *input)
 								ts->tdata[i].x,
 								ts->tdata[i].y);
 					}
+					#endif
 				}
 			}
 

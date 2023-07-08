@@ -14,9 +14,15 @@
 #include <linux/pid_namespace.h>
 #include <linux/cgroupstats.h>
 #include <linux/cpu.h>
+
+#ifdef CONFIG_CPU_INPUT_BOOST
 #include <linux/binfmts.h>
 #include <linux/cpu_input_boost.h>
+#endif
+
+#ifdef CONFIG_DEVFREQ_BOOST
 #include <linux/devfreq_boost.h>
+#endif
 
 #include <trace/events/cgroup.h>
 
@@ -546,13 +552,17 @@ static ssize_t __cgroup1_procs_write(struct kernfs_open_file *of,
 
 	ret = cgroup_attach_task(cgrp, task, threadgroup);
 
+#ifdef CONFIG_CPU_INPUT_BOOST
 	/* This covers boosting for app launches and app transitions */
 	if (!ret && !threadgroup &&
 		!memcmp(of->kn->parent->name, "top-app", sizeof("top-app")) &&
 		task_is_zygote(task->parent)) {
 		cpu_input_boost_kick_max(500);
+		#ifdef CONFIG_DEVFREQ_BOOST
 		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 500);
+		#endif
 	}
+#endif
 
 out_finish:
 	cgroup_procs_write_finish(task);

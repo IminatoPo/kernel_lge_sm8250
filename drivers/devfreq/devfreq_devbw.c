@@ -17,7 +17,11 @@
 #include <linux/mutex.h>
 #include <linux/interrupt.h>
 #include <linux/devfreq.h>
+
+#ifdef CONFIG_DEVFREQ_BOOST
 #include <linux/devfreq_boost.h>
+#endif
+
 #include <linux/slab.h>
 #include <linux/of.h>
 #include <linux/of_fdt.h>
@@ -180,8 +184,10 @@ int devfreq_add_devbw(struct device *dev)
 		return PTR_ERR(d->df);
 	}
 
+#ifdef CONFIG_DEVFREQ_BOOST
 	if (!strcmp(dev_name(dev), "soc:qcom,cpu-llcc-ddr-bw"))
 		devfreq_register_boost_device(DEVFREQ_CPU_LLCC_DDR_BW, d->df);
+#endif
 
 	return 0;
 }

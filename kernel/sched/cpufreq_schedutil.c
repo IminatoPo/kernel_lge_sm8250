@@ -1252,20 +1252,24 @@ static int sugov_init(struct cpufreq_policy *policy)
 		goto stop_kthread;
 	}
 
-	tunables->up_rate_limit_us = CONFIG_SCHEDUTIL_UP_RATE_LIMIT;
-	tunables->down_rate_limit_us = CONFIG_SCHEDUTIL_DOWN_RATE_LIMIT;
 	tunables->hispeed_load = DEFAULT_HISPEED_LOAD;
 	tunables->hispeed_freq = 0;
 
 	switch (policy->cpu) {
 	default:
 	case 0:
+		tunables->up_rate_limit_us = CONFIG_SCHEDUTIL_LP_UP_RATE_LIMIT;
+		tunables->down_rate_limit_us = CONFIG_SCHEDUTIL_LP_DOWN_RATE_LIMIT;
 		tunables->rtg_boost_freq = DEFAULT_CPU0_RTG_BOOST_FREQ;
 		break;
 	case 4:
+		tunables->up_rate_limit_us = CONFIG_SCHEDUTIL_PERF_UP_RATE_LIMIT;
+		tunables->down_rate_limit_us = CONFIG_SCHEDUTIL_PERF_DOWN_RATE_LIMIT;
 		tunables->rtg_boost_freq = DEFAULT_CPU4_RTG_BOOST_FREQ;
 		break;
 	case 7:
+		tunables->up_rate_limit_us = CONFIG_SCHEDUTIL_PRIME_UP_RATE_LIMIT;
+		tunables->down_rate_limit_us = CONFIG_SCHEDUTIL_PRIME_DOWN_RATE_LIMIT;
 		tunables->rtg_boost_freq = DEFAULT_CPU7_RTG_BOOST_FREQ;
 		break;
 	}

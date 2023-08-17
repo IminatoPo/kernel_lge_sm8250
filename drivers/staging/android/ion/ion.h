@@ -144,6 +144,9 @@ struct ion_buffer {
 	struct sg_table *sg_table;
 	struct list_head attachments;
 	struct list_head vmas;
+#ifdef CONFIG_MIGRATE_HIGHORDER
+	size_t highorder_size;
+#endif
 };
 
 void ion_buffer_destroy(struct ion_buffer *buffer);
@@ -255,6 +258,10 @@ struct ion_heap {
 
 	int (*debug_show)(struct ion_heap *heap, struct seq_file *s,
 			  void *unused);
+
+#ifdef CONFIG_MIGRATE_HIGHORDER
+	size_t free_highorder_size;
+#endif
 };
 
 /**

@@ -16,7 +16,6 @@
 #include <uapi/linux/sched/types.h>
 #include <linux/sched/core_ctl.h>
 
-#include <trace/events/sched.h>
 #include "sched.h"
 #include "walt.h"
 
@@ -687,11 +686,6 @@ static void update_running_avg(void)
 
 		cluster->strict_nrrun = compute_cluster_nr_strict_need(index);
 
-		trace_core_ctl_update_nr_need(cluster->first_cpu, nr_need,
-					prev_misfit_need,
-					cluster->nrrun, cluster->max_nr,
-					cluster->nr_prev_assist);
-
 		big_avg += cluster_real_big_tasks(index);
 	}
 	spin_unlock_irqrestore(&state_lock, flags);
@@ -801,8 +795,6 @@ static bool eval_need(struct cluster_data *cluster)
 			else if (c->busy < cluster->busy_down_thres[thres_idx])
 				c->is_busy = false;
 
-			trace_core_ctl_set_busy(c->cpu, c->busy, old_is_busy,
-						c->is_busy);
 			need_cpus += c->is_busy;
 		}
 		need_cpus = apply_task_need(cluster, need_cpus);
@@ -835,8 +827,6 @@ static bool eval_need(struct cluster_data *cluster)
 		cluster->need_ts = now;
 		cluster->need_cpus = new_need;
 	}
-	trace_core_ctl_eval_need(cluster->first_cpu, last_need, new_need,
-				 ret && need_flag);
 	spin_unlock_irqrestore(&state_lock, flags);
 
 	return ret && need_flag;
@@ -896,9 +886,6 @@ int core_ctl_set_boost(bool boost)
 			apply_need(cluster);
 	}
 
-	if (cluster)
-		trace_core_ctl_set_boost(cluster->boost, ret);
-
 	return ret;
 }
 EXPORT_SYMBOL(core_ctl_set_boost);
@@ -931,8 +918,6 @@ static void core_ctl_call_notifier(void)
 
 	ndata.nr_big = last_nr_big;
 	walt_fill_ta_data(&ndata);
-	trace_core_ctl_notif_data(ndata.nr_big, ndata.coloc_load_pct,
-			ndata.ta_util_pct, ndata.cur_cap_pct);
 
 	atomic_notifier_call_chain(&core_ctl_notifier, 0, &ndata);
 }

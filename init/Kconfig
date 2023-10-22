@@ -1279,7 +1279,7 @@ if CPUSET_ASSIST
 
 config CPUSET_AUDIO_APP
 	string "Value for 'audio-app' cpuset"
-	default "1-2"
+	default "0-3"
 	help
 	  The CPU mask to use for the audio-app cpuset.
 
@@ -1303,7 +1303,7 @@ config CPUSET_FG
 
 config CPUSET_RESTRICTED
 	string "Value for 'restricted' cpuset"
-	default "0-7"
+	default "0-3"
 	help
 	  The CPU mask to use for the restricted cpuset.
 

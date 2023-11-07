@@ -103,3 +103,30 @@ config PROC_UID
 	depends on PROC_FS && RT_MUTEXES
 	help
 	Provides aggregated per-uid information under /proc/uid.
+
+config PROC_MOD_CMDLINE
+	default n
+	bool "Modify bootloader flag if your hardware support"
+	help
+	  To force enable some feature if bootloader block it.
+
+if PROC_MOD_CMDLINE
+
+config PROC_PATCH_CMDLINE_FLAG
+	default n
+	bool "Patch the new feature if you want"
+	help
+	  If you want to patch a new feature what the bootloader blocked.
+
+config PROC_REPLACE_CMDLINE_FLAG
+	default n
+	bool "Replace the feature which bootloader send"
+	help
+	  Replace the feature from bootloader limit.
+
+config FORCE_LGE_DUAL_SIM
+	default n
+	bool "If your LGE device support dual sim"
+	help
+	  Force get LGE dual sim support.
+endif

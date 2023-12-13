@@ -4842,9 +4842,11 @@ static void throttle_cfs_rq(struct cfs_rq *cfs_rq)
 			goto done;
 
 		update_load_avg(qcfs_rq, se, 0);
+		dequeue_runnable_load_avg(qcfs_rq, se);
 
 		qcfs_rq->h_nr_running -= task_delta;
 		qcfs_rq->idle_h_nr_running -= idle_task_delta;
+		walt_dec_throttled_cfs_rq_stats(&qcfs_rq->walt_stats, cfs_rq);
 	}
 
 	/* At this point se is NULL and we are at root level*/
@@ -4917,6 +4919,7 @@ void unthrottle_cfs_rq(struct cfs_rq *cfs_rq)
 
 		cfs_rq->h_nr_running += task_delta;
 		cfs_rq->idle_h_nr_running += idle_task_delta;
+		walt_inc_throttled_cfs_rq_stats(&cfs_rq->walt_stats, tcfs_rq);
 
 		/* end evaluation on encountering a throttled cfs_rq */
 		if (cfs_rq_throttled(cfs_rq))
@@ -4927,6 +4930,7 @@ void unthrottle_cfs_rq(struct cfs_rq *cfs_rq)
 		cfs_rq = cfs_rq_of(se);
 
 		update_load_avg(cfs_rq, se, UPDATE_TG);
+		enqueue_runnable_load_avg(cfs_rq, se);
 
 		cfs_rq->h_nr_running += task_delta;
 		cfs_rq->idle_h_nr_running += idle_task_delta;
@@ -4949,6 +4953,18 @@ void unthrottle_cfs_rq(struct cfs_rq *cfs_rq)
 	walt_inc_throttled_cfs_rq_stats(&rq->walt_stats, tcfs_rq);
 
 unthrottle_throttle:
+
+	/*
+	 * The cfs_rq_throttled() breaks in the above iteration can result in
+	 * incomplete leaf list maintenance, resulting in triggering the
+	 * assertion below.
+	 */
+	for_each_sched_entity(se) {
+		cfs_rq = cfs_rq_of(se);
+
+		if (list_add_leaf_cfs_rq(cfs_rq))
+			break;
+	}
 
 	assert_list_leaf_cfs_rq(rq);
 
@@ -5585,7 +5601,7 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 	int task_new = !(flags & ENQUEUE_WAKEUP);
-	int idle_h_nr_running = idle_policy(p->policy);
+	int idle_h_nr_running = task_has_idle_policy(p);
 
 	/*
 	 * The code below (indirectly) updates schedutil which looks at
@@ -5630,55 +5646,63 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		cfs_rq = cfs_rq_of(se);
 		enqueue_entity(cfs_rq, se, flags);
 
-		/*
-		 * end evaluation on encountering a throttled cfs_rq
-		 *
-		 * note: in the case of encountering a throttled cfs_rq we will
-		 * post the final h_nr_running increment below.
-		 */
-		if (cfs_rq_throttled(cfs_rq))
-			break;
 		cfs_rq->h_nr_running++;
 		cfs_rq->idle_h_nr_running += idle_h_nr_running;
 		walt_inc_cfs_rq_stats(cfs_rq, p);
+
+		/* end evaluation on encountering a throttled cfs_rq */
+		if (cfs_rq_throttled(cfs_rq))
+			goto enqueue_throttle;
 
 		flags = ENQUEUE_WAKEUP;
 	}
 
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);
+
+		update_load_avg(cfs_rq, se, UPDATE_TG);
+		enqueue_runnable_load_avg(cfs_rq, se);
+		update_cfs_group(se);
+
 		cfs_rq->h_nr_running++;
 		cfs_rq->idle_h_nr_running += idle_h_nr_running;
 		walt_inc_cfs_rq_stats(cfs_rq, p);
 
+		/* end evaluation on encountering a throttled cfs_rq */
 		if (cfs_rq_throttled(cfs_rq))
-			break;
+			goto enqueue_throttle;
 
-		update_load_avg(cfs_rq, se, UPDATE_TG);
-		update_cfs_group(se);
-	}
-
-	if (!se) {
-		add_nr_running(rq, 1);
-		inc_rq_walt_stats(rq, p);
 		/*
-		 * Since new tasks are assigned an initial util_avg equal to
-		 * half of the spare capacity of their CPU, tiny tasks have the
-		 * ability to cross the overutilized threshold, which will
-		 * result in the load balancer ruining all the task placement
-		 * done by EAS. As a way to mitigate that effect, do not account
-		 * for the first enqueue operation of new tasks during the
-		 * overutilized flag detection.
-		 *
-		 * A better way of solving this problem would be to wait for
-		 * the PELT signals of tasks to converge before taking them
-		 * into account, but that is not straightforward to implement,
-		 * and the following generally works well enough in practice.
+		 * One parent has been throttled and cfs_rq removed from the
+		 * list. Add it back to not break the leaf list.
 		 */
-		if (!task_new)
-			update_overutilized_status(rq);
+		if (throttled_hierarchy(cfs_rq))
+			list_add_leaf_cfs_rq(cfs_rq);
 	}
 
+	/* At this point se is NULL and we are at root level*/
+	add_nr_running(rq, 1);
+	inc_rq_walt_stats(rq, p);
+
+	/*
+	 * Since new tasks are assigned an initial util_avg equal to
+	 * half of the spare capacity of their CPU, tiny tasks have the
+	 * ability to cross the overutilized threshold, which will
+	 * result in the load balancer ruining all the task placement
+	 * done by EAS. As a way to mitigate that effect, do not account
+	 * for the first enqueue operation of new tasks during the
+	 * overutilized flag detection.
+	 *
+	 * A better way of solving this problem would be to wait for
+	 * the PELT signals of tasks to converge before taking them
+	 * into account, but that is not straightforward to implement,
+	 * and the following generally works well enough in practice.
+	 */
+	if (!task_new)
+		update_overutilized_status(rq);
+
+
+enqueue_throttle:
 	if (cfs_bandwidth_used()) {
 		/*
 		 * When bandwidth control is enabled; the cfs_rq_throttled()
@@ -5711,7 +5735,7 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 	int task_sleep = flags & DEQUEUE_SLEEP;
-	int idle_h_nr_running = idle_policy(p->policy);
+	int idle_h_nr_running = task_has_idle_policy(p);
 	bool was_sched_idle = sched_idle_rq(rq);
 
 	/*
@@ -5726,17 +5750,13 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		cfs_rq = cfs_rq_of(se);
 		dequeue_entity(cfs_rq, se, flags);
 
-		/*
-		 * end evaluation on encountering a throttled cfs_rq
-		 *
-		 * note: in the case of encountering a throttled cfs_rq we will
-		 * post the final h_nr_running decrement below.
-		*/
-		if (cfs_rq_throttled(cfs_rq))
-			break;
 		cfs_rq->h_nr_running--;
 		cfs_rq->idle_h_nr_running -= idle_h_nr_running;
 		walt_dec_cfs_rq_stats(cfs_rq, p);
+
+		/* end evaluation on encountering a throttled cfs_rq */
+		if (cfs_rq_throttled(cfs_rq))
+			goto dequeue_throttle;
 
 		/* Don't dequeue parent if it has other entities besides us */
 		if (cfs_rq->load.weight) {
@@ -5755,26 +5775,29 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);
+
+		update_load_avg(cfs_rq, se, UPDATE_TG);
+		dequeue_runnable_load_avg(cfs_rq, se);
+		update_cfs_group(se);
+
 		cfs_rq->h_nr_running--;
 		cfs_rq->idle_h_nr_running -= idle_h_nr_running;
 		walt_dec_cfs_rq_stats(cfs_rq, p);
 
+		/* end evaluation on encountering a throttled cfs_rq */
 		if (cfs_rq_throttled(cfs_rq))
-			break;
-
-		update_load_avg(cfs_rq, se, UPDATE_TG);
-		update_cfs_group(se);
+			goto dequeue_throttle;
 	}
 
-	if (!se) {
-		sub_nr_running(rq, 1);
-		dec_rq_walt_stats(rq, p);
-	}
+	/* At this point se is NULL and we are at root level*/
+	sub_nr_running(rq, 1);
+	dec_rq_walt_stats(rq, p);
 
 	/* balance early to pull high priority tasks */
 	if (unlikely(!was_sched_idle && sched_idle_rq(rq)))
 		rq->next_balance = jiffies;
 
+dequeue_throttle:
 	util_est_dequeue(&rq->cfs, p, task_sleep);
 	hrtick_update(rq);
 }

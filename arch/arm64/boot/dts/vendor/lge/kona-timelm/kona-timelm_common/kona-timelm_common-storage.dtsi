@@ -13,7 +13,7 @@
 				dev = "/dev/block/platform/soc/1d84000.ufshc/by-name/product";
 				type = "ext4";
 				mnt_flags = "ro,nodev,barrier=1,errors=continue";
-				fsmgr_flags = "wait,slotselect,avb";
+				fsmgr_flags = "wait,slotselect";
 				status = "disabled";
 			};
 			OP {
@@ -22,7 +22,7 @@
 				type = "ext4";
 				mnt_point = "/mnt/product/OP";
 				mnt_flags = "ro,noatime,nosuid,nodev,barrier=1,data=ordered,noauto_da_alloc";
-				fsmgr_flags = "wait,slotselect,avb,nofail";
+				fsmgr_flags = "wait,slotselect,nofail";
 				status = "disabled";
 			};
 			drm {

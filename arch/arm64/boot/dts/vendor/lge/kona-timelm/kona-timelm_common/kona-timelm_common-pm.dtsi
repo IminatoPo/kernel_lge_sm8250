@@ -536,7 +536,7 @@
 			lge,usb2    = < 500    0    0>;
 			lge,usb3    = < 900    0    0>;
 			lge,cdp     = <1500 1500    0>;
-			lge,pd      = <   0    0    0>;
+			lge,pd      = <4000    0    0>;
 
 			lge,56k     = <1500  500    0>;
 			lge,130k    = <1500  500    0>;
@@ -610,7 +610,7 @@
 					restrict-name = "LCD";
 					restrict-type = "ibat";
 					restrict-commands = "ON", "OFF";
-					restrict-values = <0      0>;
+					restrict-values = <4000      0>;
 				};
 				lge,restrict@1 {
 					restrict-name = "CALL";
@@ -795,9 +795,9 @@
 			lge,wired-temp-offset = <(-40) (-10) (-10)>;   // thermal first, balanced, charging first
 			lge,wired-max-hold-criteria = <500 700 1000>;  // allow rising 1 degree per 20/14/10/min
 			lge,wired-stage-size = <3>;
-			lge,wired-target-temp = <300 340 380>;
-			lge,wired-current-limit-ma = <2600 1500 500>;
-			lge,wired-curr-cp-limit-ma = <4000 3000>;      // extension of lge,wired-current-limit-ma
+			lge,wired-target-temp = <360 390 420>;
+			lge,wired-current-limit-ma = <4000 3200 500>;
+			lge,wired-curr-cp-limit-ma = <4000 3200>;      // extension of lge,wired-current-limit-ma
                                                            // 0-pps, 1-qc3.0
 			lge,wired-max-fcc-ma = <4850 3200 3100>;       // 0-pps ta, 1- qc3.0 ta, 2-qc2.0 ta
 			lge,wired-current-step-size = <3>;
@@ -850,7 +850,7 @@
 	/* format : type, power(mW), current(mA), down(uA), target(min) */
 	/* cp pps  thermal  */    0    25000    4000       0    110
 	/*         balanced */  100    25000    4000       0    100
-	/*         charging */  200    25000    4850       0     90
+	/*         charging */  200    25000    4000       0     90
 	/* CP QC3  thermal  */    1    16200    3000       0    125
 	/*         balanced */  101    16200    3000       0    115
 	/*         charging */  201    16200    3200       0    105

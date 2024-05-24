@@ -9,6 +9,25 @@
 #include <linux/sched/core_ctl.h>
 #include <trace/events/sched.h>
 
+static inline bool task_is_booster(void)
+{
+	char comm[TASK_COMM_LEN];
+
+	get_task_comm(comm, current);
+	return !strcmp(comm, "init") || !strcmp(comm, "NodeLooperThrea") ||
+	       !strcmp(comm, "power@1.2-servi") ||
+	       !strcmp(comm, "power@1.3-servi") ||
+	       !strcmp(comm, "perf@1.0-servic") ||
+	       !strcmp(comm, "perf@2.0-servic") ||
+	       !strcmp(comm, "perf@2.1-servic") ||
+	       !strcmp(comm, "perf@2.2-servic") ||
+	       !strcmp(comm, "power@2.0-servic") ||
+	       !strcmp(comm, "powercontrol@1.3-servic") ||
+	       !strcmp(comm, "rescontrol@2.0-servic") ||
+	       !strcmp(comm, "iop@") ||
+	       !strcmp(comm, "init.qcom.post_");
+}
+
 /*
  * Scheduler boost is a mechanism to temporarily place tasks on CPUs
  * with higher capacity than those where a task would have normally
@@ -264,6 +283,9 @@ int sched_boost_handler(struct ctl_table *table, int write,
 {
 	int ret;
 	unsigned int *data = (unsigned int *)table->data;
+
+	if (task_is_booster())
+		return 0;
 
 	mutex_lock(&boost_mutex);
 

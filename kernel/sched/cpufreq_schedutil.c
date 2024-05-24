@@ -21,18 +21,10 @@ static inline bool task_is_booster(void)
 	char comm[TASK_COMM_LEN];
 
 	get_task_comm(comm, current);
-	return !strcmp(comm, "init") || !strcmp(comm, "NodeLooperThrea") ||
-	       !strcmp(comm, "power@1.2-servi") ||
-	       !strcmp(comm, "power@1.3-servi") ||
-	       !strcmp(comm, "perf@1.0-servic") ||
-	       !strcmp(comm, "perf@2.0-servic") ||
-	       !strcmp(comm, "perf@2.1-servic") ||
-	       !strcmp(comm, "perf@2.2-servic") ||
-	       !strcmp(comm, "power@2.0-servic") ||
-	       !strcmp(comm, "powercontrol@1.3-servic") ||
-	       !strcmp(comm, "rescontrol@2.0-servic") ||
-	       !strcmp(comm, "iop@") ||
-	       !strcmp(comm, "init.qcom.post_");
+	return strstr(comm, "init")  || strstr(comm, "NodeLooperThrea") ||
+	       strstr(comm, "power") || strstr(comm, "rescontrol") ||
+	       strstr(comm, "perf")  ||
+	       strstr(comm, "iop");
 }
 
 struct sugov_tunables {
@@ -1279,7 +1271,7 @@ static int sugov_init(struct cpufreq_policy *policy)
 		tunables->rtg_boost_freq = DEFAULT_CPU4_RTG_BOOST_FREQ;
 		tunables->hispeed_load = 70;
 		tunables->hispeed_freq = 1862400;
-		tunables->pl = true;
+		tunables->pl = false;
 		break;
 	case 7:
 		tunables->up_rate_limit_us = CONFIG_SCHEDUTIL_PRIME_UP_RATE_LIMIT;

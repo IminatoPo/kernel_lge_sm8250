@@ -1719,7 +1719,7 @@ int reclaim_address_space(struct address_space *mapping,
 			continue;
 		}
 
-		if (radix_tree_exceptional_entry(page))
+		if (xa_is_value(page))
 			continue;
 
 		if (isolate_lru_page(page))
